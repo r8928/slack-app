@@ -2,6 +2,8 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { sendSlack } from "../../utils/slack";
 import { sendEmail } from "../../utils/sendgrid";
 
+export const runtime = "edge";
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<any>
@@ -39,18 +41,27 @@ export default async function handler(
   }
 
   if (errors.length > 0) {
+    console.error(`🚀 > errors:`, errors);
     return res.status(422).json({ errors });
   }
 
   try {
-    sendSlack(slackMessage, slackChannel, slackToken);
+    const slack = await sendSlack(slackMessage, slackChannel, slackToken);
+    console.log(`🚀 > slack:`, slack);
   } catch (error) {
     console.error("Error sending slack:", error);
     return res.status(400).json({ error });
   }
 
   try {
-    sendEmail(fromEmail, toEmail, subject, sendgridToken, body);
+    const sendgrid = await sendEmail(
+      fromEmail,
+      toEmail,
+      subject,
+      sendgridToken,
+      body
+    );
+    console.log(`🚀 > sendgrid:`, sendgrid);
   } catch (error) {
     console.error("Error sending email:", error);
     return res.status(400).json({ error });
