@@ -49,5 +49,5 @@ export const sendEmail = (
     body: JSON.stringify(data),
   };
 
-  // return fetch(sendgridApiUrl, options).then((response) => response.text());
+  return fetch(sendgridApiUrl, options).then((response) => response.text());
 };
