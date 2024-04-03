@@ -147,9 +147,11 @@ export default function Home() {
     setSettingsContainer((prv) => !prv);
     setPunchContainer((prv) => !prv);
     setTimeout(() => {
-      getTokens();
-      getDates();
-      generateText();
+      try {
+        getTokens();
+        getDates();
+        generateText();
+      } catch (error) {}
     });
   }
 
