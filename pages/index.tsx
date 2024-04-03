@@ -75,6 +75,8 @@ export default function Home() {
         hour: "2-digit",
         minute: "2-digit",
       });
+
+      generateText();
     }
   }
 
@@ -94,6 +96,8 @@ export default function Home() {
         hour: "2-digit",
         minute: "2-digit",
       });
+
+      generateText();
     }
   }
 
