@@ -226,8 +226,8 @@ export default function Home() {
       </Head>
 
       <main className="main mb-5">
-        <div className="flex justify-between font-mono mb-[1rem] px-[2rem] py-4 mt-3 max-w-[550px] mx-auto shadow-2xl text-blue-600 backdrop-blur-lg rounded-md">
-          <h1 className="text-2xl">CB Attendance App</h1>
+        <div className="flex justify-between font-mono mb-[1rem] px-[2rem] py-4 mt-3 max-w-[550px] mx-auto shadow-2xl text-orange-600 backdrop-blur-lg rounded-md">
+          <h1 className="text-2xl font-black">CB Attendance App</h1>
           <span
             id="settings-button"
             className="text-2xl cursor-pointer"
@@ -255,9 +255,9 @@ export default function Home() {
                 />
                 <label
                   className="h-[100px] w-[135px] cursor-pointer rounded-lg px-5 py-2.5 flex items-center justify-center
-                      text-green-700 border-2 bg-white border-green-700
-                      hover:bg-green-800 hover:text-white
-                      peer-checked:ring-4 peer-checked:ring-green-300 peer-checked:bg-green-700 peer-checked:text-white
+                      text-green-800 border-2 bg-green-100 border-green-200
+                      hover:bg-green-200
+                      peer-checked:ring-4 peer-checked:ring-green-300 peer-checked:bg-green-300 peer-checked:border-green-600
                       "
                   htmlFor="check-in"
                 >
@@ -276,9 +276,9 @@ export default function Home() {
                 />
                 <label
                   className="h-[100px] w-[135px] cursor-pointer rounded-lg px-5 py-2.5 flex items-center justify-center
-                      text-red-700 border-2 bg-white border-red-700
-                      hover:bg-red-800 hover:text-white
-                      peer-checked:ring-4 peer-checked:ring-red-300 peer-checked:bg-red-700 peer-checked:text-white
+                  text-red-800 border-2 bg-red-100 border-red-200
+                  hover:bg-red-200
+                  peer-checked:ring-4 peer-checked:ring-red-300 peer-checked:bg-red-300 peer-checked:border-red-600
                       "
                   htmlFor="check-out"
                 >
@@ -335,9 +335,9 @@ export default function Home() {
                 />
                 <label
                   className="h-[100px] w-[135px] cursor-pointer rounded-lg px-5 py-2.5 flex items-center justify-center
-                    text-yellow-800 border-2 bg-white border-yellow-200
-                    hover:bg-yellow-100
-                    peer-checked:ring-4 peer-checked:ring-yellow-300 peer-checked:bg-yellow-200
+                    text-yellow-800 border-2 bg-yellow-100 border-yellow-200
+                    hover:bg-yellow-200
+                    peer-checked:ring-4 peer-checked:ring-yellow-300 peer-checked:bg-yellow-300 peer-checked:border-yellow-600
                     "
                   htmlFor="from-office"
                 >
@@ -356,9 +356,9 @@ export default function Home() {
                 />
                 <label
                   className="h-[100px] w-[135px] cursor-pointer rounded-lg px-5 py-2.5 flex items-center justify-center
-                    text-blue-800 border-2 bg-white border-blue-200
-                    hover:bg-blue-100
-                    peer-checked:ring-4 peer-checked:ring-blue-300 peer-checked:bg-blue-200
+                    text-blue-800 border-2 bg-blue-100 border-blue-200
+                    hover:bg-blue-200
+                    peer-checked:ring-4 peer-checked:ring-blue-300 peer-checked:bg-blue-300 peer-checked:border-blue-600
                     "
                   htmlFor="from-home"
                 >
@@ -413,14 +413,14 @@ export default function Home() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-[100%] text-white bg-blue-700
-                 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300
+                className="w-[100%] text-white bg-orange-700
+                 hover:bg-orange-800 focus:ring-4 focus:ring-orange-300
                  rounded-lg px-5 py-2.5
-                 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800
+                 dark:bg-orange-600 dark:hover:bg-orange-700 focus:outline-none dark:focus:ring-orange-800
                  disabled:bg-gray-400 disabled:ring-0 disabled:cursor-not-allowed
                  "
               >
-                Submit{loading && "ting..."}
+                Send{loading && "ing..."}
               </button>
             )}
           </form>

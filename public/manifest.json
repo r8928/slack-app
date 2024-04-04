@@ -4,7 +4,7 @@
     "description": "Citrusbits Attendance Application: Posts messages on Slack and sends emails to attendance, making attendance a breeze.",
     "start_url": "/",
     "display": "standalone",
-    "background_color": "#dce2f5",
+    "background_color": "#fff5cc",
     "theme_color": "#da532c",
     "icons": [
         {

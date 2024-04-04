@@ -1,11 +1,11 @@
 import type { AppProps } from "next/app";
-import { Poppins as Inter } from "next/font/google";
+import { Montserrat as Inter } from "next/font/google";
 import "src/styles/globals.css";
 
 const inter = Inter({
   subsets: ["latin"],
   display: "swap",
-  weight: "400",
+  weight: ["400", "900"],
 });
 
 export default function App({ Component, pageProps }: AppProps) {
