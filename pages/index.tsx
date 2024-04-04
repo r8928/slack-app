@@ -1,11 +1,15 @@
 import Head from "next/head";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Settings } from "src/components/Settings";
 
 export default function Home() {
   // constants
   const toEmail = process.env.NEXT_PUBLIC_TO_EMAIL;
   const slackChannel = process.env.NEXT_PUBLIC_SLACK_CHANNEL;
+
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   // init vars
   const [settingsContainer, setSettingsContainer] = useState(false);
@@ -23,6 +27,11 @@ export default function Home() {
     getDates();
     generateText();
   }, []);
+
+  const hasConfig = useMemo(
+    () => sendgridToken && slackToken && fromEmail,
+    [sendgridToken, slackToken, fromEmail]
+  );
 
   function getTokens() {
     setSendgridTokenInput(localStorage.getItem("sendgrid-token") || "");
@@ -163,9 +172,13 @@ export default function Home() {
     e.preventDefault();
 
     if (!subject) {
-      alert("Please fill complete form");
+      setError("Please fill in the form.");
       return;
     }
+
+    setError("");
+    setLoading(true);
+    setSuccess(false);
 
     const data = {
       slackChannel,
@@ -183,11 +196,19 @@ export default function Home() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
     })
+      .then((res) => res.json())
       .then((res) => {
-        console.log(`🚀 > fetch > res:`, res);
+        if (!res?.success) {
+          setError(JSON.stringify(res));
+          console.log(`🚀 > /api/send > res:`, res);
+        } else {
+          setSuccess(true);
+        }
+        setLoading(false);
       })
       .catch((error) => {
-        console.error(`🚀 > fetch > error:`, error);
+        setError(JSON.stringify(error));
+        console.error(`🚀 > /api/send > error:`, error);
       });
   }
 
@@ -197,8 +218,8 @@ export default function Home() {
         <title>CB Attendance App</title>
       </Head>
 
-      <main className="main">
-        <div className="flex justify-between font-mono mb-[2rem]">
+      <main className="main mb-5">
+        <div className="flex justify-between font-mono mb-[1rem] px-[2rem] py-4 mt-3 max-w-[550px] mx-auto shadow-2xl text-blue-600 backdrop-blur-lg rounded-md">
           <h1 className="text-2xl">CB Attendance App</h1>
           <span
             id="settings-button"
@@ -209,11 +230,11 @@ export default function Home() {
           </span>
         </div>
 
-        {!punchContainer ? null : (
+        {!punchContainer && !success ? null : (
           <form
             id="punch-form"
             onSubmit={submitPunch}
-            className="border rounded-lg p-3 border-yellow-600 mx-auto w-[350px] flex flex-col gap-5"
+            className="rounded-lg p-5 shadow-2xl mx-auto w-[320px] flex flex-col gap-5 backdrop-blur-md"
           >
             <div className="flex gap-3">
               <div>
@@ -226,7 +247,7 @@ export default function Home() {
                   onChange={generateText}
                 />
                 <label
-                  className="h-[100px] w-[150px] cursor-pointer rounded-lg px-5 py-2.5 flex items-center justify-center
+                  className="h-[100px] w-[135px] cursor-pointer rounded-lg px-5 py-2.5 flex items-center justify-center
                       text-green-700 border-2 bg-white border-green-700
                       hover:bg-green-800 hover:text-white
                       peer-checked:ring-4 peer-checked:ring-green-300 peer-checked:bg-green-700 peer-checked:text-white
@@ -247,7 +268,7 @@ export default function Home() {
                   onChange={generateText}
                 />
                 <label
-                  className="h-[100px] w-[150px] cursor-pointer rounded-lg px-5 py-2.5 flex items-center justify-center
+                  className="h-[100px] w-[135px] cursor-pointer rounded-lg px-5 py-2.5 flex items-center justify-center
                       text-red-700 border-2 bg-white border-red-700
                       hover:bg-red-800 hover:text-white
                       peer-checked:ring-4 peer-checked:ring-red-300 peer-checked:bg-red-700 peer-checked:text-white
@@ -306,7 +327,7 @@ export default function Home() {
                   onChange={generateText}
                 />
                 <label
-                  className="h-[100px] w-[150px] cursor-pointer rounded-lg px-5 py-2.5 flex items-center justify-center
+                  className="h-[100px] w-[135px] cursor-pointer rounded-lg px-5 py-2.5 flex items-center justify-center
                     text-yellow-800 border-2 bg-white border-yellow-200
                     hover:bg-yellow-100
                     peer-checked:ring-4 peer-checked:ring-yellow-300 peer-checked:bg-yellow-200
@@ -327,7 +348,7 @@ export default function Home() {
                   onChange={generateText}
                 />
                 <label
-                  className="h-[100px] w-[150px] cursor-pointer rounded-lg px-5 py-2.5 flex items-center justify-center
+                  className="h-[100px] w-[135px] cursor-pointer rounded-lg px-5 py-2.5 flex items-center justify-center
                     text-blue-800 border-2 bg-white border-blue-200
                     hover:bg-blue-100
                     peer-checked:ring-4 peer-checked:ring-blue-300 peer-checked:bg-blue-200
@@ -345,17 +366,56 @@ export default function Home() {
               onChange={generateText}
             ></textarea>
 
-            <div className="color-warning">{slackMessage}</div>
+            <div className="border-2 border-gray-400 rounded-lg p-3 text-gray-800">
+              {slackMessage}
+            </div>
 
-            <button
-              type="submit"
-              className="w-[100%] text-white bg-blue-700
+            {!error ? null : (
+              <div className="border-2 rounded-lg p-3 border-red-800 bg-red-100 text-red-900">
+                {error}
+              </div>
+            )}
+
+            {!hasConfig || !slackMessage ? (
+              /* bg-blue-700 */
+              <button
+                type="submit"
+                disabled={true}
+                className="w-[100%]
+               rounded-lg px-5 py-2.5
+               border-2
+               border-gray-400 disabled:bg-gray-300 text-gray-500
+               "
+              >
+                {!hasConfig ? "Configs not set" : "Please fill all fields"}
+              </button>
+            ) : success ? (
+              /* bg-blue-700 */
+              <button
+                type="submit"
+                disabled={true}
+                className="w-[100%]
+               rounded-lg px-5 py-2.5
+               border-2 border-green-700
+               disabled:bg-green-100 disabled:ring-0 disabled:cursor-not-allowed
+               "
+              >
+                ✔
+              </button>
+            ) : (
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-[100%] text-white bg-blue-700
                  hover:bg-blue-800 focus:ring-4 focus:ring-blue-300
                  rounded-lg px-5 py-2.5
-                 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-            >
-              Submit
-            </button>
+                 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800
+                 disabled:bg-gray-400 disabled:ring-0 disabled:cursor-not-allowed
+                 "
+              >
+                Submit{loading && "ting..."}
+              </button>
+            )}
           </form>
         )}
 
@@ -367,8 +427,6 @@ export default function Home() {
             onClose={toggleSettings}
           />
         )}
-
-        <div className="grid"></div>
       </main>
     </>
   );

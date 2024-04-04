@@ -1,5 +1,6 @@
-import { sendEmail } from "../../utils/sendgrid";
-import { sendSlack } from "../../utils/slack";
+import { NextApiResponse } from "next";
+import { sendEmail } from "src/utils/sendgrid";
+import { sendSlack } from "src/utils/slack";
 
 export const runtime = "edge";
 
@@ -11,8 +12,9 @@ export const config = {
   },
 };
 
-export default async function handler(req: Request, res: Response) {
+export default async function handler(req: Request, res: NextApiResponse) {
   const request = await req.json();
+  let errorMessage;
 
   const {
     slackChannel,
@@ -59,21 +61,25 @@ export default async function handler(req: Request, res: Response) {
     });
   }
 
-  try {
-    const slack = await sendSlack(slackMessage, slackChannel, slackToken);
-    console.log(`🚀 > slack:`, slack);
-  } catch (error) {
-    console.error("Error sending slack:", error);
+  const slack = await sendSlack(slackMessage, slackChannel, slackToken);
+  console.log(`🚀 > sendSlack:`, slack);
+  if (!slack.ok) {
+    try {
+      errorMessage = JSON.stringify({ SLACK: JSON.parse(slack) });
+    } catch (error) {
+      errorMessage = JSON.stringify({ SLACK: slack });
+    }
 
-    return new Response(JSON.stringify(error), {
-      headers: {
-        "content-type": "application/json",
-      },
-      status: 400,
-    });
+    if (errorMessage) {
+      return new Response(errorMessage, {
+        headers: {
+          "content-type": "application/json",
+        },
+        status: 400,
+      });
+    }
   }
 
-  // try {
   const sendgrid = await sendEmail(
     fromEmail,
     toEmail,
@@ -81,17 +87,23 @@ export default async function handler(req: Request, res: Response) {
     sendgridToken,
     body || subject
   );
-  console.log(`🚀 > sendgrid:`, sendgrid);
-  // } catch (error: any) {
-  //   console.error("Error sending email:", error);
+  console.log(`🚀 > sendEmail:`, sendgrid);
+  if (sendgrid) {
+    try {
+      errorMessage = JSON.stringify({ SENDGRID: JSON.parse(sendgrid) });
+    } catch (error) {
+      errorMessage = JSON.stringify({ SENDGRID: sendgrid });
+    }
 
-  //   return new Response(JSON.stringify(error), {
-  //     headers: {
-  //       "content-type": "application/json",
-  //     },
-  //     status: 400,
-  //   });
-  // }
+    if (errorMessage) {
+      return new Response(errorMessage, {
+        headers: {
+          "content-type": "application/json",
+        },
+        status: 400,
+      });
+    }
+  }
 
   return new Response(JSON.stringify({ success: true }), {
     headers: {
