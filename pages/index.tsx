@@ -4,9 +4,6 @@ import { Settings } from "src/components/Settings";
 
 export default function Home() {
   // constants
-  const toEmail = process.env.NEXT_PUBLIC_TO_EMAIL;
-  const slackChannel = process.env.NEXT_PUBLIC_SLACK_CHANNEL;
-
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -17,6 +14,8 @@ export default function Home() {
   const [sendgridToken, setSendgridTokenInput] = useState("");
   const [slackToken, setSlackTokenInput] = useState("");
   const [fromEmail, setFromEmail] = useState("");
+  const [toEmail, setToEmail] = useState("");
+  const [slackChannel, setSlackChannel] = useState("");
   const [slackMessage, setSlackMessage] = useState("");
   const [subject, setSubject] = useState("");
   const [comment, setComment] = useState("");
@@ -33,10 +32,30 @@ export default function Home() {
     [sendgridToken, slackToken, fromEmail]
   );
 
+  function toggleSettings() {
+    setSettingsContainer((prv) => !prv);
+    setPunchContainer((prv) => !prv);
+    setTimeout(() => {
+      try {
+        getTokens();
+        getDates();
+        generateText();
+      } catch (error) {}
+    });
+  }
+
   function getTokens() {
     setSendgridTokenInput(localStorage.getItem("sendgrid-token") || "");
     setSlackTokenInput(localStorage.getItem("slack-token") || "");
     setFromEmail(localStorage.getItem("email-from") || "");
+    setToEmail(
+      localStorage.getItem("to-email") || process.env.NEXT_PUBLIC_TO_EMAIL || ""
+    );
+    setSlackChannel(
+      localStorage.getItem("slack-channel") ||
+        process.env.NEXT_PUBLIC_SLACK_CHANNEL ||
+        ""
+    );
   }
 
   function getDates() {
@@ -154,18 +173,6 @@ export default function Home() {
     } else {
       console.log(`🚀 >`, { dateInput, timeInput, checkText, fromText });
     }
-  }
-
-  function toggleSettings() {
-    setSettingsContainer((prv) => !prv);
-    setPunchContainer((prv) => !prv);
-    setTimeout(() => {
-      try {
-        getTokens();
-        getDates();
-        generateText();
-      } catch (error) {}
-    });
   }
 
   function submitPunch(e: any) {

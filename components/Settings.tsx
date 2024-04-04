@@ -6,12 +6,22 @@ export function Settings(props: any) {
   const [sendgridToken, setSendgridTokenInput] = useState("");
   const [slackToken, setSlackTokenInput] = useState("");
   const [fromEmail, setFromEmail] = useState("");
+  const [toEmail, setToEmail] = useState("");
+  const [slackChannel, setSlackChannel] = useState("");
 
   // load local storage
   useEffect(() => {
     setSendgridTokenInput(localStorage.getItem("sendgrid-token") || "");
     setSlackTokenInput(localStorage.getItem("slack-token") || "");
     setFromEmail(localStorage.getItem("email-from") || "");
+    setToEmail(
+      localStorage.getItem("to-email") || process.env.NEXT_PUBLIC_TO_EMAIL || ""
+    );
+    setSlackChannel(
+      localStorage.getItem("slack-channel") ||
+        process.env.NEXT_PUBLIC_SLACK_CHANNEL ||
+        ""
+    );
   }, []);
 
   function saveSettings(e: any) {
@@ -22,6 +32,8 @@ export function Settings(props: any) {
     localStorage.setItem("sendgrid-token", sendgridToken);
     localStorage.setItem("slack-token", slackToken);
     localStorage.setItem("email-from", fromEmail);
+    localStorage.setItem("to-email", toEmail);
+    localStorage.setItem("slack-channel", slackChannel);
 
     setTimeout(() => {
       props.onClose();
@@ -59,10 +71,11 @@ export function Settings(props: any) {
       <div>
         <label>To email</label>
         <input
-          type="text"
-          disabled
+          type="email"
+          id="email-to"
           className="w-[100%] border-2 rounded-lg border-gray-400 p-2"
-          value={process.env.NEXT_PUBLIC_TO_EMAIL}
+          value={toEmail}
+          onChange={(e) => setToEmail(e.target.value)}
         />
       </div>
 
@@ -70,9 +83,10 @@ export function Settings(props: any) {
         <label>Slack channel</label>
         <input
           type="text"
-          disabled
+          id="slack-channel"
           className="w-[100%] border-2 rounded-lg border-gray-400 p-2"
-          value={process.env.NEXT_PUBLIC_SLACK_CHANNEL}
+          value={slackChannel}
+          onChange={(e) => setSlackChannel(e.target.value)}
         />
       </div>
 
