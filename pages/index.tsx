@@ -91,20 +91,21 @@ export default function Home() {
     const timeEl = document.getElementById("current-time") as HTMLInputElement;
     if (timeEl) {
       const time = timeEl.value;
+      if (time) {
+        const [hours, minutes] = time.split(":");
+        const currentTime = new Date();
+        currentTime.setHours(Number(hours));
+        currentTime.setMinutes(Number(minutes));
+        currentTime.setMinutes(currentTime.getMinutes() - 1);
 
-      const [hours, minutes] = time.split(":");
-      const currentTime = new Date();
-      currentTime.setHours(Number(hours));
-      currentTime.setMinutes(Number(minutes));
-      currentTime.setMinutes(currentTime.getMinutes() - 1);
+        timeEl.value = currentTime.toLocaleTimeString("en-US", {
+          hour12: false,
+          hour: "2-digit",
+          minute: "2-digit",
+        });
 
-      timeEl.value = currentTime.toLocaleTimeString("en-US", {
-        hour12: false,
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-
-      generateText();
+        generateText();
+      }
     }
   }
 
@@ -112,20 +113,21 @@ export default function Home() {
     const timeEl = document.getElementById("current-time") as HTMLInputElement;
     if (timeEl) {
       const time = timeEl.value;
+      if (time) {
+        const [hours, minutes] = time.split(":");
+        const currentTime = new Date();
+        currentTime.setHours(Number(hours));
+        currentTime.setMinutes(Number(minutes));
+        currentTime.setMinutes(currentTime.getMinutes() + 1);
 
-      const [hours, minutes] = time.split(":");
-      const currentTime = new Date();
-      currentTime.setHours(Number(hours));
-      currentTime.setMinutes(Number(minutes));
-      currentTime.setMinutes(currentTime.getMinutes() + 1);
+        timeEl.value = currentTime.toLocaleTimeString("en-US", {
+          hour12: false,
+          hour: "2-digit",
+          minute: "2-digit",
+        });
 
-      timeEl.value = currentTime.toLocaleTimeString("en-US", {
-        hour12: false,
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-
-      generateText();
+        generateText();
+      }
     }
   }
 
@@ -156,9 +158,14 @@ export default function Home() {
     const checkText = document.querySelector(".check-radio:checked") as any;
     const fromText = document.querySelector(".from-radio:checked") as any;
 
-    if (dateInput && timeInput && checkText && fromText) {
-      setSubject("");
-
+    if (
+      dateInput &&
+      dateInput.value &&
+      timeInput &&
+      timeInput.value &&
+      checkText &&
+      fromText
+    ) {
       const date = formattedDate(dateInput.value, timeInput.value);
       const text = `${checkText.value} ${date} - ${fromText.value}`;
 
@@ -171,6 +178,8 @@ export default function Home() {
       setSlackMessage(`${text} ${comment ? " (" + comment + ")" : ""}`);
       console.log(`🚀 > generateText > text:`, text);
     } else {
+      setSubject("");
+      setSlackMessage("");
       console.log(`🚀 >`, { dateInput, timeInput, checkText, fromText });
     }
   }
