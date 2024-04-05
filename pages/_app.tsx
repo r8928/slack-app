@@ -1,5 +1,6 @@
 import type { AppProps } from "next/app";
 import { Montserrat as Inter } from "next/font/google";
+import { useEffect } from "react";
 import "src/styles/globals.css";
 
 const inter = Inter({
@@ -9,6 +10,22 @@ const inter = Inter({
 });
 
 export default function App({ Component, pageProps }: AppProps) {
+  useEffect(() => {
+    const backgrounds = [
+      //
+      "/bg/cup.svg",
+      "/bg/leaves.svg",
+      "/bg/computer.svg",
+      "/bg/motorcycle.svg",
+      "/bg/rocket.svg",
+      "/bg/tulip.svg",
+      "/bg/laptop.svg",
+    ];
+
+    const bg = backgrounds[Math.floor(Math.random() * backgrounds.length)];
+    document.body.style.backgroundImage = `url(${bg})`;
+  }, []);
+
   return (
     <main className={`${inter.className}]`}>
       {/* <div

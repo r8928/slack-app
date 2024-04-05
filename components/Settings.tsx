@@ -44,7 +44,7 @@ export function Settings(props: any) {
     <form
       id="settings-form"
       onSubmit={saveSettings}
-      className="rounded-lg p-5 shadow-2xl mx-auto w-[350px] flex flex-col gap-5 backdrop-blur-md"
+      className="rounded-lg p-5 mx-auto w-[320px] flex flex-col gap-5"
     >
       <div>
         <label htmlFor="sendgrid-token">SendGrid token</label>

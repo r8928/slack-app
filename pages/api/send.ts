@@ -25,6 +25,9 @@ export default async function handler(req: Request, res: NextApiResponse) {
     slackMessage,
     subject,
     body,
+    ts,
+    newTs,
+    shouldSendEmail,
   } = request;
 
   console.log(`🚀 > handler > request:`, request);
@@ -61,7 +64,14 @@ export default async function handler(req: Request, res: NextApiResponse) {
     });
   }
 
-  const slack = await sendSlack(slackMessage, slackChannel, slackToken);
+  let messageTs = null;
+  const slack = await sendSlack(
+    slackMessage,
+    slackChannel,
+    slackToken,
+    ts,
+    newTs
+  );
   console.log(`🚀 > sendSlack:`, slack);
   if (!slack.ok) {
     try {
@@ -78,34 +88,40 @@ export default async function handler(req: Request, res: NextApiResponse) {
         status: 400,
       });
     }
-  }
-
-  const sendgrid = await sendEmail(
-    fromEmail,
-    toEmail,
-    subject,
-    sendgridToken,
-    body || subject
-  );
-  console.log(`🚀 > sendEmail:`, sendgrid);
-  if (sendgrid) {
-    try {
-      errorMessage = JSON.stringify({ SENDGRID: JSON.parse(sendgrid) });
-    } catch (error) {
-      errorMessage = JSON.stringify({ SENDGRID: sendgrid });
-    }
-
-    if (errorMessage) {
-      return new Response(errorMessage, {
-        headers: {
-          "content-type": "application/json",
-        },
-        status: 400,
-      });
+  } else {
+    if (newTs) {
+      messageTs = slack.ts || null;
     }
   }
 
-  return new Response(JSON.stringify({ success: true }), {
+  if (shouldSendEmail) {
+    const sendgrid = await sendEmail(
+      fromEmail,
+      toEmail,
+      subject,
+      sendgridToken,
+      body || "-"
+    );
+    console.log(`🚀 > sendEmail:`, sendgrid);
+    if (sendgrid) {
+      try {
+        errorMessage = JSON.stringify({ SENDGRID: JSON.parse(sendgrid) });
+      } catch (error) {
+        errorMessage = JSON.stringify({ SENDGRID: sendgrid });
+      }
+
+      if (errorMessage) {
+        return new Response(errorMessage, {
+          headers: {
+            "content-type": "application/json",
+          },
+          status: 400,
+        });
+      }
+    }
+  }
+
+  return new Response(JSON.stringify({ success: true, ts: messageTs }), {
     headers: {
       "content-type": "application/json",
     },

@@ -2,6 +2,8 @@ import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
 import { Settings } from "src/components/Settings";
 
+const currentDate = new Date().toLocaleDateString("en-GB");
+
 export default function Home() {
   // constants
   const [error, setError] = useState("");
@@ -19,9 +21,12 @@ export default function Home() {
   const [slackMessage, setSlackMessage] = useState("");
   const [subject, setSubject] = useState("");
   const [comment, setComment] = useState("");
+  const [checkText, setCheckText] = useState("");
+  const [sendToSlack, setSendToSlack] = useState(false);
 
   // load local storage
   useEffect(() => {
+    getTs();
     getTokens();
     getDates();
     generateText();
@@ -31,6 +36,20 @@ export default function Home() {
     () => sendgridToken && slackToken && fromEmail,
     [sendgridToken, slackToken, fromEmail]
   );
+
+  const isNewTs = () => {
+    return checkText === "Check-In";
+  };
+
+  const removeTs = () => {
+    if (checkText === "Check-Out") {
+      localStorage.removeItem("last-ts");
+    }
+  };
+
+  const shouldSendEmail = () => {
+    return checkText === "Check-In" || checkText === "Check-Out";
+  };
 
   function toggleSettings() {
     setSettingsContainer((prv) => !prv);
@@ -131,23 +150,6 @@ export default function Home() {
     }
   }
 
-  function formattedDate(date: string, time: string) {
-    const inputDateString = `${date} ${time}`; // Replace this with your input date string
-    const inputDate = new Date(inputDateString.replace(" ", "T")); // Convert to Date object
-
-    const options: any = {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    };
-
-    return inputDate.toLocaleString("en-US", options);
-  }
-
   function generateText() {
     const dateInput = document.getElementById(
       "current-date"
@@ -159,15 +161,29 @@ export default function Home() {
     const fromText = document.querySelector(".from-radio:checked") as any;
 
     if (
-      dateInput &&
-      dateInput.value &&
-      timeInput &&
-      timeInput.value &&
-      checkText &&
-      fromText
+      dateInput?.value &&
+      timeInput?.value &&
+      ((checkText?.value && fromText?.value) ||
+        checkText?.value === "AFK" ||
+        checkText?.value === "Back")
     ) {
-      const date = formattedDate(dateInput.value, timeInput.value);
-      const text = `${checkText.value} ${date} - ${fromText.value}`;
+      let text;
+
+      setCheckText(checkText.value);
+
+      if (checkText.value === "Check-In" || checkText?.value === "Check-Out") {
+        const date = formattedDate(dateInput.value, timeInput.value);
+        text = `${checkText.value} ${date} - ${fromText.value}`;
+      } else {
+        const time = formattedTime(dateInput.value, timeInput.value);
+        text = `${checkText.value} at ${time}`;
+      }
+
+      const slackTheNotes = (
+        document.querySelector("#send-notes:checked") as any
+      )?.checked;
+
+      setSendToSlack(slackTheNotes);
 
       const comment = String(
         (document.querySelector("#extra-comments") as any).value || ""
@@ -175,12 +191,12 @@ export default function Home() {
 
       setSubject(text);
       setComment(comment);
-      setSlackMessage(`${text} ${comment ? " (" + comment + ")" : ""}`);
-      console.log(`🚀 > generateText > text:`, text);
+      setSlackMessage(
+        `${text} ${comment && slackTheNotes ? " (" + comment + ")" : ""}`
+      );
     } else {
       setSubject("");
       setSlackMessage("");
-      console.log(`🚀 >`, { dateInput, timeInput, checkText, fromText });
     }
   }
 
@@ -205,6 +221,9 @@ export default function Home() {
       slackMessage,
       subject,
       body: comment,
+      ts: getTs(),
+      newTs: isNewTs(),
+      shouldSendEmail: shouldSendEmail(),
     };
 
     fetch("/api/send", {
@@ -216,9 +235,17 @@ export default function Home() {
       .then((res) => {
         if (!res?.success) {
           setError(JSON.stringify(res));
-          console.log(`🚀 > /api/send > res:`, res);
         } else {
           setSuccess(true);
+
+          if (res?.ts) {
+            localStorage.setItem(
+              "last-ts",
+              JSON.stringify({ date: currentDate, ts: res.ts })
+            );
+          }
+
+          removeTs();
         }
         setLoading(false);
       })
@@ -235,11 +262,11 @@ export default function Home() {
       </Head>
 
       <main className="main mb-5">
-        <div className="flex justify-between font-mono mb-[1rem] px-[2rem] py-4 mt-3 max-w-[550px] mx-auto shadow-2xl text-orange-600 backdrop-blur-lg rounded-md">
+        <div className="flex justify-between font-mono mb-[1rem] px-[2rem] py-4 mt-3 max-w-[550px] mx-auto shadow-2xl text-orange-600 backdrop-blur-sm rounded-md">
           <h1 className="text-2xl font-black">CB Attendance App</h1>
           <span
             id="settings-button"
-            className="text-2xl cursor-pointer"
+            className="text-2xl select-none cursor-pointer"
             onClick={toggleSettings}
           >
             ⚙️
@@ -250,9 +277,9 @@ export default function Home() {
           <form
             id="punch-form"
             onSubmit={submitPunch}
-            className="rounded-lg p-5 shadow-2xl mx-auto w-[320px] flex flex-col gap-5 backdrop-blur-md"
+            className="rounded-lg p-5 mx-auto w-[320px] flex flex-col gap-5"
           >
-            <div className="flex gap-3">
+            <div className="flex gap-3 flex-wrap">
               <div>
                 <input
                   type="radio"
@@ -263,7 +290,7 @@ export default function Home() {
                   onChange={generateText}
                 />
                 <label
-                  className="h-[100px] w-[135px] cursor-pointer rounded-lg px-5 py-2.5 flex items-center justify-center
+                  className="h-[50px] w-[133px] select-none cursor-pointer rounded-lg px-5 py-2.5 flex items-center justify-center
                       text-green-800 border-2 bg-green-100 border-green-200
                       hover:bg-green-200
                       peer-checked:ring-4 peer-checked:ring-green-300 peer-checked:bg-green-300 peer-checked:border-green-600
@@ -279,15 +306,57 @@ export default function Home() {
                   type="radio"
                   className="hidden peer check-radio"
                   name="check-radio"
+                  value="AFK"
+                  id="AFK"
+                  onChange={generateText}
+                />
+                <label
+                  className="h-[50px] w-[133px] select-none cursor-pointer rounded-lg px-5 py-2.5 flex items-center justify-center
+                    text-cyan-800 border-2 bg-cyan-100 border-cyan-200
+                    hover:bg-cyan-200
+                    peer-checked:ring-4 peer-checked:ring-cyan-300 peer-checked:bg-cyan-300 peer-checked:border-cyan-600
+                    "
+                  htmlFor="AFK"
+                >
+                  AFK
+                </label>
+              </div>
+
+              <div>
+                <input
+                  type="radio"
+                  className="hidden peer check-radio"
+                  name="check-radio"
+                  value="Back"
+                  id="Back"
+                  onChange={generateText}
+                />
+                <label
+                  className="h-[50px] w-[133px] select-none cursor-pointer rounded-lg px-5 py-2.5 flex items-center justify-center
+                    text-blue-800 border-2 bg-blue-100 border-blue-200
+                    hover:bg-blue-200
+                    peer-checked:ring-4 peer-checked:ring-blue-300 peer-checked:bg-blue-300 peer-checked:border-blue-600
+                    "
+                  htmlFor="Back"
+                >
+                  Back
+                </label>
+              </div>
+
+              <div>
+                <input
+                  type="radio"
+                  className="hidden peer check-radio"
+                  name="check-radio"
                   value="Check-Out"
                   id="check-out"
                   onChange={generateText}
                 />
                 <label
-                  className="h-[100px] w-[135px] cursor-pointer rounded-lg px-5 py-2.5 flex items-center justify-center
-                  text-red-800 border-2 bg-red-100 border-red-200
-                  hover:bg-red-200
-                  peer-checked:ring-4 peer-checked:ring-red-300 peer-checked:bg-red-300 peer-checked:border-red-600
+                  className="h-[50px] w-[133px] select-none cursor-pointer rounded-lg px-5 py-2.5 flex items-center justify-center
+                  text-rose-800 border-2 bg-rose-100 border-rose-200
+                  hover:bg-rose-200
+                  peer-checked:ring-4 peer-checked:ring-rose-300 peer-checked:bg-rose-300 peer-checked:border-rose-600
                       "
                   htmlFor="check-out"
                 >
@@ -300,7 +369,7 @@ export default function Home() {
               <input
                 type="date"
                 id="current-date"
-                className="w-[100%] text-center border-2 rounded-lg border-gray-400 p-2"
+                className="w-[100%] text-center bg-transparent border-2 rounded-lg border-gray-400 p-2"
                 onChange={generateText}
                 required
               />
@@ -318,7 +387,7 @@ export default function Home() {
               <input
                 type="time"
                 id="current-time"
-                className="w-[100%] text-center border-2 rounded-lg border-gray-400 p-2"
+                className="w-[100%] text-center bg-transparent border-2 rounded-lg border-gray-400 p-2"
                 onChange={generateText}
                 required
               />
@@ -343,10 +412,10 @@ export default function Home() {
                   onChange={generateText}
                 />
                 <label
-                  className="h-[100px] w-[135px] cursor-pointer rounded-lg px-5 py-2.5 flex items-center justify-center
-                    text-yellow-800 border-2 bg-yellow-100 border-yellow-200
-                    hover:bg-yellow-200
-                    peer-checked:ring-4 peer-checked:ring-yellow-300 peer-checked:bg-yellow-300 peer-checked:border-yellow-600
+                  className="h-[50px] w-[133px] select-none cursor-pointer rounded-lg px-5 py-2.5 flex items-center justify-center
+                    text-cyan-800 border-2 bg-cyan-100 border-cyan-200
+                    hover:bg-cyan-200
+                    peer-checked:ring-4 peer-checked:ring-cyan-300 peer-checked:bg-cyan-300 peer-checked:border-cyan-600
                     "
                   htmlFor="from-office"
                 >
@@ -364,10 +433,10 @@ export default function Home() {
                   onChange={generateText}
                 />
                 <label
-                  className="h-[100px] w-[135px] cursor-pointer rounded-lg px-5 py-2.5 flex items-center justify-center
-                    text-blue-800 border-2 bg-blue-100 border-blue-200
-                    hover:bg-blue-200
-                    peer-checked:ring-4 peer-checked:ring-blue-300 peer-checked:bg-blue-300 peer-checked:border-blue-600
+                  className="h-[50px] w-[133px] select-none cursor-pointer rounded-lg px-5 py-2.5 flex items-center justify-center
+                    text-violet-800 border-2 bg-violet-100 border-violet-200
+                    hover:bg-violet-200
+                    peer-checked:ring-4 peer-checked:ring-violet-300 peer-checked:bg-violet-300 peer-checked:border-violet-600
                     "
                   htmlFor="from-home"
                 >
@@ -377,10 +446,26 @@ export default function Home() {
             </div>
 
             <textarea
+              placeholder="Optional email notes"
               id="extra-comments"
-              className="w-[100%] border-2 rounded-lg border-gray-400 p-2"
+              className="w-[100%] bg-transparent border-2 rounded-lg border-gray-400 p-2"
               onChange={generateText}
             ></textarea>
+            {/* checkbox: send optional notes with slack message */}
+            <div className="flex items-center gap-2 select-none cursor-pointer">
+              <input
+                type="checkbox"
+                id="send-notes"
+                className="peer"
+                defaultChecked={true}
+                onChange={generateText}
+              />
+              <label htmlFor="send-notes">
+                {sendToSlack
+                  ? "Send notes with Slack message"
+                  : "Send notes only in the email body"}
+              </label>
+            </div>
 
             <div className="border-2 border-gray-400 rounded-lg p-3 text-gray-800">
               {slackMessage}
@@ -398,10 +483,10 @@ export default function Home() {
                 type="submit"
                 disabled={true}
                 className="w-[100%]
-               rounded-lg px-5 py-2.5
-               border-2
-               border-gray-400 disabled:bg-gray-300 text-gray-500
-               "
+                  rounded-lg px-5 py-2.5
+                  border-2
+                  border-gray-400 disabled:bg-gray-300 text-gray-500
+                  "
               >
                 {!hasConfig ? "Configs not set" : "Please fill all fields"}
               </button>
@@ -411,12 +496,12 @@ export default function Home() {
                 type="submit"
                 disabled={true}
                 className="w-[100%]
-               rounded-lg px-5 py-2.5
-               border-2 border-green-700
-               disabled:bg-green-100 disabled:ring-0 disabled:cursor-not-allowed
-               "
+                  rounded-lg px-5 py-2.5
+                  border-2 border-green-700
+                  disabled:bg-green-100 disabled:ring-0 disabled:cursor-not-allowed
+                  "
               >
-                ✔
+                ✅
               </button>
             ) : (
               <button
@@ -446,4 +531,48 @@ export default function Home() {
       </main>
     </>
   );
+}
+
+const getTs = () => {
+  const lastTs = localStorage.getItem("last-ts");
+  if (lastTs) {
+    try {
+      const { date, ts } = JSON.parse(lastTs);
+      if (date === currentDate) {
+        return ts;
+      }
+    } catch (error) {}
+  }
+
+  return undefined;
+};
+
+function formattedDate(date: string, time: string) {
+  const inputDateString = `${date} ${time}`; // Replace this with your input date string
+  const inputDate = new Date(inputDateString.replace(" ", "T")); // Convert to Date object
+
+  const options: Intl.DateTimeFormatOptions = {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  };
+
+  return inputDate.toLocaleString("en-US", options);
+}
+
+function formattedTime(date: string, time: string) {
+  const inputDateString = `${date} ${time}`; // Replace this with your input date string
+  const inputDate = new Date(inputDateString.replace(" ", "T")); // Convert to Date object
+
+  const options: any = {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  };
+
+  return inputDate.toLocaleString("en-US", options);
 }
