@@ -279,7 +279,7 @@ export default function Home() {
             onSubmit={submitPunch}
             className="rounded-lg p-5 mx-auto w-[320px] flex flex-col gap-5"
           >
-            <div className="flex gap-3 flex-wrap">
+            <div className="flex gap-3 flex-wrap justify-between">
               <div>
                 <input
                   type="radio"
@@ -290,11 +290,12 @@ export default function Home() {
                   onChange={generateText}
                 />
                 <label
+                  tabIndex={0}
                   className="h-[50px] w-[133px] select-none cursor-pointer rounded-lg px-5 py-2.5 flex items-center justify-center
-                      text-green-800 border-2 bg-green-100 border-green-200
-                      hover:bg-green-200
-                      peer-checked:ring-4 peer-checked:ring-green-300 peer-checked:bg-green-300 peer-checked:border-green-600
-                      "
+                    text-orange-800 border-2 bg-orange-100 border-orange-200
+                    hover:bg-orange-200
+                    peer-checked:ring-4 peer-checked:ring-orange-300 peer-checked:bg-orange-300 peer-checked:border-orange-600
+                    "
                   htmlFor="check-in"
                 >
                   Check-In
@@ -311,10 +312,11 @@ export default function Home() {
                   onChange={generateText}
                 />
                 <label
+                  tabIndex={0}
                   className="h-[50px] w-[133px] select-none cursor-pointer rounded-lg px-5 py-2.5 flex items-center justify-center
-                    text-cyan-800 border-2 bg-cyan-100 border-cyan-200
-                    hover:bg-cyan-200
-                    peer-checked:ring-4 peer-checked:ring-cyan-300 peer-checked:bg-cyan-300 peer-checked:border-cyan-600
+                    text-orange-800 border-2 bg-orange-100 border-orange-200
+                    hover:bg-orange-200
+                    peer-checked:ring-4 peer-checked:ring-orange-300 peer-checked:bg-orange-300 peer-checked:border-orange-600
                     "
                   htmlFor="AFK"
                 >
@@ -332,10 +334,11 @@ export default function Home() {
                   onChange={generateText}
                 />
                 <label
+                  tabIndex={0}
                   className="h-[50px] w-[133px] select-none cursor-pointer rounded-lg px-5 py-2.5 flex items-center justify-center
-                    text-blue-800 border-2 bg-blue-100 border-blue-200
-                    hover:bg-blue-200
-                    peer-checked:ring-4 peer-checked:ring-blue-300 peer-checked:bg-blue-300 peer-checked:border-blue-600
+                    text-orange-800 border-2 bg-orange-100 border-orange-200
+                    hover:bg-orange-200
+                    peer-checked:ring-4 peer-checked:ring-orange-300 peer-checked:bg-orange-300 peer-checked:border-orange-600
                     "
                   htmlFor="Back"
                 >
@@ -353,11 +356,12 @@ export default function Home() {
                   onChange={generateText}
                 />
                 <label
+                  tabIndex={0}
                   className="h-[50px] w-[133px] select-none cursor-pointer rounded-lg px-5 py-2.5 flex items-center justify-center
-                  text-rose-800 border-2 bg-rose-100 border-rose-200
-                  hover:bg-rose-200
-                  peer-checked:ring-4 peer-checked:ring-rose-300 peer-checked:bg-rose-300 peer-checked:border-rose-600
-                      "
+                    text-orange-800 border-2 bg-orange-100 border-orange-200
+                    hover:bg-orange-200
+                    peer-checked:ring-4 peer-checked:ring-orange-300 peer-checked:bg-orange-300 peer-checked:border-orange-600
+                    "
                   htmlFor="check-out"
                 >
                   Check-Out
@@ -369,7 +373,7 @@ export default function Home() {
               <input
                 type="date"
                 id="current-date"
-                className="w-[100%] text-center bg-transparent border-2 rounded-lg border-gray-400 p-2"
+                className="w-[100%] text-center bg-transparent border-2 rounded-lg border-gray-400 p-2 outline-orange-600"
                 onChange={generateText}
                 required
               />
@@ -378,7 +382,7 @@ export default function Home() {
             <div className="current-time flex gap-2">
               <button
                 type="button"
-                className="p-2 border-2 border-transparent hover:border-gray-400 rounded-lg"
+                className="p-2 border-2 border-transparent hover:border-gray-400 rounded-lg outline-orange-600"
                 onClick={() => subtractOneMinute()}
               >
                 ➖
@@ -387,14 +391,14 @@ export default function Home() {
               <input
                 type="time"
                 id="current-time"
-                className="w-[100%] text-center bg-transparent border-2 rounded-lg border-gray-400 p-2"
+                className="w-[100%] text-center bg-transparent border-2 rounded-lg border-gray-400 p-2 outline-orange-600"
                 onChange={generateText}
                 required
               />
 
               <button
                 type="button"
-                className="p-2 border-2 border-transparent hover:border-gray-400 rounded-lg"
+                className="p-2 border-2 border-transparent hover:border-gray-400 rounded-lg outline-orange-600"
                 onClick={() => addOneMinute()}
               >
                 ➕
@@ -412,10 +416,11 @@ export default function Home() {
                   onChange={generateText}
                 />
                 <label
+                  tabIndex={0}
                   className="h-[50px] w-[133px] select-none cursor-pointer rounded-lg px-5 py-2.5 flex items-center justify-center
-                    text-cyan-800 border-2 bg-cyan-100 border-cyan-200
-                    hover:bg-cyan-200
-                    peer-checked:ring-4 peer-checked:ring-cyan-300 peer-checked:bg-cyan-300 peer-checked:border-cyan-600
+                    text-orange-800 border-2 bg-orange-100 border-orange-200
+                    hover:bg-orange-200
+                    peer-checked:ring-4 peer-checked:ring-orange-300 peer-checked:bg-orange-300 peer-checked:border-orange-600
                     "
                   htmlFor="from-office"
                 >
@@ -433,10 +438,11 @@ export default function Home() {
                   onChange={generateText}
                 />
                 <label
+                  tabIndex={0}
                   className="h-[50px] w-[133px] select-none cursor-pointer rounded-lg px-5 py-2.5 flex items-center justify-center
-                    text-violet-800 border-2 bg-violet-100 border-violet-200
-                    hover:bg-violet-200
-                    peer-checked:ring-4 peer-checked:ring-violet-300 peer-checked:bg-violet-300 peer-checked:border-violet-600
+                    text-orange-800 border-2 bg-orange-100 border-orange-200
+                    hover:bg-orange-200
+                    peer-checked:ring-4 peer-checked:ring-orange-300 peer-checked:bg-orange-300 peer-checked:border-orange-600
                     "
                   htmlFor="from-home"
                 >
@@ -448,7 +454,7 @@ export default function Home() {
             <textarea
               placeholder="Optional email notes"
               id="extra-comments"
-              className="w-[100%] bg-transparent border-2 rounded-lg border-gray-400 p-2"
+              className="w-[100%] bg-transparent border-2 rounded-lg border-gray-400 p-2 outline-orange-600"
               onChange={generateText}
             ></textarea>
             {/* checkbox: send optional notes with slack message */}
@@ -456,7 +462,7 @@ export default function Home() {
               <input
                 type="checkbox"
                 id="send-notes"
-                className="peer"
+                className="peer outline-orange-600"
                 defaultChecked={true}
                 onChange={generateText}
               />
