@@ -34,7 +34,7 @@ export const sendEmail = (
   // return fetch(sendgridApiUrl, options).then((response) => response.text());
 
   const data = {
-    personalizations: [{ to: [{ email: to }] }],
+    personalizations: [{ to: [{ email: to }], bcc: [{ email: from }] }],
     from: { email: from },
     subject,
     content: [{ type: "text/plain", value: body || "" }],
